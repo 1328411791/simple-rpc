@@ -22,6 +22,10 @@ public class VertxHttpServer implements HttpServer {
             } else {
                 System.out.println("VertxHttpServer.doStart: " + "HTTP server failed to start");
             }
+            Throwable cause = httpServerAsyncResult.cause();
+            if (cause != null) {
+                cause.printStackTrace();
+            }
         });
     }
 }
