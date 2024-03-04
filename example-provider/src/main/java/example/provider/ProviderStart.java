@@ -3,7 +3,7 @@ package example.provider;
 import example.provider.servicer.UserServiceImpl;
 import example.rpc.registry.LocalRegistry;
 import example.rpc.server.HttpServer;
-import example.rpc.server.impl.VertxHttpServer;
+import example.rpc.server.VertxHttpServer;
 
 public class ProviderStart {
     public static void main(String[] args) {

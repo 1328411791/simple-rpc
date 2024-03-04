@@ -1,4 +1,4 @@
-package example.rpc.server.impl;
+package example.rpc.server;
 
 import example.rpc.server.HttpServer;
 import io.vertx.core.Vertx;
@@ -9,6 +9,7 @@ public class VertxHttpServer implements HttpServer {
         System.out.println("VertxHttpServer.doStart: " + port);
 
         io.vertx.core.http.HttpServer server = Vertx.vertx().createHttpServer();
+        server.requestHandler(new HttpServerHandler());
 
         server.requestHandler(request -> {
             System.out.println("VertxHttpServer.doStart: " + request.path());
