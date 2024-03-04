@@ -11,11 +11,13 @@ public class VertxHttpServer implements HttpServer {
         io.vertx.core.http.HttpServer server = Vertx.vertx().createHttpServer();
         server.requestHandler(new HttpServerHandler());
 
+        /*
         server.requestHandler(request -> {
             System.out.println("VertxHttpServer.doStart: " + request.path());
 
             request.response().putHeader("content-type", "text/plain").end("Hello World!");
         });
+         */
 
         server.listen(port,httpServerAsyncResult -> {
             if (httpServerAsyncResult.succeeded()) {

@@ -8,8 +8,8 @@ public class ConsumerStart {
         User user = new User();
         user.setUsername("zhangsan");
         user.setPassword("123456");
-        UserService userService = null;
+        UserService userService = new UserServiceProxy();
         userService.getUser(user);
-
+        System.out.println("ConsumerStart.main: " + user);
     }
 }
