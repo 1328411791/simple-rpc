@@ -7,7 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 public class UserServiceImpl implements UserService {
 
     @Override
-    public void getUser(User user) {
+    public User getUser(User user) {
         System.out.println("UserServiceImpl.getUser: " + user.toString());
+        return user;
     }
 }
