@@ -1,22 +1,19 @@
 package example.rpc.serializer;
 
+import example.rpc.spi.SpiLoader;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public class SerializerFactory {
 
-    private static final Map<String, Serializer> serializerMap = new HashMap<>(){
-        {
-            put(SerializerKeys.HESSIAN, new HessianSerializer());
-            put(SerializerKeys.JSON, new JsonSerializer());
-            put(SerializerKeys.JDK, new JdkSerializer());
-            put(SerializerKeys.KRYO, new KryoSerializer());
-        }
-    };
+    static {
+        SpiLoader.load(Serializer.class);
+    }
 
-    private static final Serializer DEFAULT_SERIALIZER = serializerMap.get(SerializerKeys.KRYO);
+    private static final Serializer DEFAULT_SERIALIZER = new JsonSerializer();
 
     public static Serializer getSerializer(String key){
-        return serializerMap.getOrDefault(key, DEFAULT_SERIALIZER);
+        return SpiLoader.getInstance(Serializer.class, key);
     }
 }
