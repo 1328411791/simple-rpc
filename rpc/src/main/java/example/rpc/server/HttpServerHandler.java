@@ -1,25 +1,35 @@
 package example.rpc.server;
 
 
+import example.rpc.RpcApplication;
 import example.rpc.model.RpcRequest;
 import example.rpc.model.RpcResponse;
 import example.rpc.registry.LocalRegistry;
 import example.rpc.serializer.JdkSerializer;
 import example.rpc.serializer.Serializer;
+import example.rpc.serializer.SerializerFactory;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ServiceLoader;
 
 
+@Slf4j
 public class HttpServerHandler implements Handler<HttpServerRequest> {
 
     @Override
     public void handle(HttpServerRequest httpServerRequest) {
-        final Serializer serializer = new JdkSerializer();
+        // 从配置文件中读取序列化器
+
+        String stringSerializer = RpcApplication.getRpcConfig().getSerializer();
+        log.info("Serializer: {}" ,stringSerializer);
+        Serializer serializer =
+                SerializerFactory.getSerializer(stringSerializer);
 
         System.out.println("HttpServerHandler.handle: " + httpServerRequest.path());
 

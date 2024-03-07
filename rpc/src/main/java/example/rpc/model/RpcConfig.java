@@ -1,5 +1,6 @@
 package example.rpc.model;
 
+import example.rpc.serializer.SerializerKeys;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -25,4 +26,6 @@ public class RpcConfig {
 
     // 服务端口
     private int serverPort;
+
+    private String serializer = SerializerKeys.JDK;
 }
