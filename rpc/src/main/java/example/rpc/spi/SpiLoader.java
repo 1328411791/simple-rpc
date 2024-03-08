@@ -1,10 +1,12 @@
 package example.rpc.spi;
 
+import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.io.resource.ResourceUtil;
 import example.rpc.serializer.Serializer;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.Array;
@@ -68,16 +70,17 @@ public class SpiLoader {
 
         // 加载系统SPI
         for (String spi : SCAN_DIR) {
-            // 获取资源
-            List<URL> resources = ResourceUtil.getResources(spi);
-
+            // 获取目录下所有资源的URL
+            List<URL> resources = ResourceUtil.getResources(spi+clazz.getName());
 
             for(URL resource : resources) {
                 try {
+                    // 读取目录下的文件内容
                     InputStreamReader reader = new InputStreamReader(resource.openStream());
                     BufferedReader bufferedReader = new BufferedReader(reader);
                     String line;
                     while ((line = bufferedReader.readLine()) != null) {
+                        log.info("SpiLoader.load: " + line);
                         String[] split = line.split("=");
                         if(split.length>1){
                             String key = split[0];

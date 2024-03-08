@@ -27,7 +27,7 @@ public class HttpServerHandler implements Handler<HttpServerRequest> {
         // 从配置文件中读取序列化器
 
         String stringSerializer = RpcApplication.getRpcConfig().getSerializer();
-        log.info("Serializer: {}" ,stringSerializer);
+        log.info("example.rpc.serializer.example.rpc.serializer.Serializer: {}" ,stringSerializer);
         Serializer serializer =
                 SerializerFactory.getSerializer(stringSerializer);
 
