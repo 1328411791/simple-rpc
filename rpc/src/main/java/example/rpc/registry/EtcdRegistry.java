@@ -23,6 +23,7 @@ public class EtcdRegistry  implements Registry{
 
     @Override
     public void initRegistry(RegistryConfig registryConfig) {
+        // 创建链接客户端
         client = Client.builder().endpoints(registryConfig.getAddress())
                 .connectTimeout(Duration.ofMillis(registryConfig.getTimeout()))
                 .build();
@@ -33,6 +34,7 @@ public class EtcdRegistry  implements Registry{
     public void register(ServiceMetaInfo serviceMetaInfo) {
         Lease leaseClient = client.getLeaseClient();
 
+        // 注册服务，设置租约时间为30s
         long leaseId = leaseClient.grant(30).join().getID();
 
         String registryKey = REGISTRY_TYPE + serviceMetaInfo.getServiceNodeKey();
