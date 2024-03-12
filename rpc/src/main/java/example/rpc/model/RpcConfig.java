@@ -18,6 +18,9 @@ public class RpcConfig {
     // 服务版本
     private String version;
 
+    // 注册中心类型
+    private String registryType;
+
     // 服务地址
     private String serverAddress;
 
@@ -27,9 +30,25 @@ public class RpcConfig {
     // 服务端口
     private int serverPort;
 
+    // 用户名
+    private String username;
+
+    // 密码
+    private String password;
+
     // Mock
     private boolean mock = false;
 
     // 序列化器
     private String serializer = SerializerKeys.JDK;
+
+    public RegistryConfig getRegistryConfig() {
+        RegistryConfig registryConfig = new RegistryConfig();
+        registryConfig.setRegistryType(registryType);
+        registryConfig.setPort(serverPort);
+        registryConfig.setAddress(serverAddress);
+        registryConfig.setUsername(username);
+        registryConfig.setPassword(password);
+        return registryConfig;
+    }
 }

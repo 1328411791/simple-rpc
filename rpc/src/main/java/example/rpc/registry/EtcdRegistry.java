@@ -24,7 +24,7 @@ public class EtcdRegistry  implements Registry{
     @Override
     public void initRegistry(RegistryConfig registryConfig) {
         // 创建链接客户端
-        client = Client.builder().endpoints(registryConfig.getAddress())
+        client = Client.builder().endpoints(registryConfig.getAddress()+":"+registryConfig.getPort())
                 .connectTimeout(Duration.ofMillis(registryConfig.getTimeout()))
                 .build();
         kvClient = client.getKVClient();

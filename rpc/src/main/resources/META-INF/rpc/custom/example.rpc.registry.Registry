@@ -1,1 +1,2 @@
 etcd=example.rpc.registry.EtcdRegistry
+redis=example.rpc.registry.RedisRegistry
