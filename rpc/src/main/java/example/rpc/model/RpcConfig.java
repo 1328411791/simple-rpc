@@ -27,5 +27,9 @@ public class RpcConfig {
     // 服务端口
     private int serverPort;
 
+    // Mock
+    private boolean mock = false;
+
+    // 序列化器
     private String serializer = SerializerKeys.JDK;
 }
