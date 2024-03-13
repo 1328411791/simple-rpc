@@ -26,7 +26,7 @@ public class ServiceMetaInfo {
         }
 
         public String getServiceNodeKey() {
-            return String.format("%s/%s", serviceAddress, serviceGroup);
+                return String.format("%s/%s", serviceName, serviceGroup);
         }
 
         public String getServiceAddress() {
