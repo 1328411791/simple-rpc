@@ -25,6 +25,8 @@ public class EtcdRegistry  implements Registry{
 
     private final Set<String> localRegistryNode = new HashSet<>();
 
+    private final RegistryServiceCache registryServiceCache = new RegistryServiceCache();
+
     private Client client;
 
     private KV kvClient;
@@ -74,6 +76,11 @@ public class EtcdRegistry  implements Registry{
     @Override
     public List<ServiceMetaInfo> serviceDiscovery(String serviceKey) {
 
+        List<ServiceMetaInfo> cacheServiceMetaInfos = registryServiceCache.readCache();
+        if (CollUtil.isNotEmpty(cacheServiceMetaInfos)) {
+            return cacheServiceMetaInfos;
+        }
+
         String searchPrefix = REGISTRY_TYPE + serviceKey+"/";
         try {
             GetOption getOption = GetOption.builder().isPrefix(true).build();
@@ -81,10 +88,14 @@ public class EtcdRegistry  implements Registry{
                     ByteSequence.from(searchPrefix, StandardCharsets.UTF_8),
                     getOption).join().getKvs();
 
-            return keyValues.stream().map(keyValue -> {
+            List<ServiceMetaInfo> serviceMetaInfos = keyValues.stream().map(keyValue -> {
                 String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                 return JSONUtil.toBean(value, ServiceMetaInfo.class);
             }).collect(Collectors.toList());
+
+            registryServiceCache.writeCache(serviceMetaInfos);
+
+            return serviceMetaInfos;
         }catch (Exception e) {
             throw new RuntimeException("service discovery error", e);
         }
