@@ -31,8 +31,6 @@ public class RegistryTest {
         registry.register(serviceMetaInfo);
     }
 
-
-    /*
     @Test
     public void unRegistryTest() {
         ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
@@ -42,8 +40,6 @@ public class RegistryTest {
         serviceMetaInfo.setServicePort("8080");
         registry.unregister(serviceMetaInfo);
     }
-
-     */
 
     @Test
     public void serviceDiscoveryTest() {

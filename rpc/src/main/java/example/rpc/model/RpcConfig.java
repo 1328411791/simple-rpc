@@ -47,6 +47,7 @@ public class RpcConfig {
         registryConfig.setRegistryType(registryType);
         registryConfig.setPort(serverPort);
         registryConfig.setAddress(serverAddress);
+        registryConfig.setRegistryType(registryType);
         registryConfig.setUsername(username);
         registryConfig.setPassword(password);
         return registryConfig;
