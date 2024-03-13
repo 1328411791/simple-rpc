@@ -58,4 +58,9 @@ public class RedisRegistry implements Registry{
             jedis.close();
         }
     }
+
+    @Override
+    public void headBeat() {
+
+    }
 }

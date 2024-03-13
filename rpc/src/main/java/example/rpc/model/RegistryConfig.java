@@ -8,17 +8,23 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class RegistryConfig {
 
+    // 注册中心类型
     private String registryType;
 
+    // 注册中心地址
     private String address;
 
+    // 注册中心端口
     private int port;
 
+    // 用户名
     private String username;
 
+    // 密码
     private String password;
 
-    private Long timeout = 5000L;
+    // 超时时间
+    private Long timeout = 30L;
 
 
     public RegistryConfig(String registryType, String address, int port, String username, String password, Long timeout) {

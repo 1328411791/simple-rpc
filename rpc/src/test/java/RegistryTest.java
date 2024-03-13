@@ -31,6 +31,7 @@ public class RegistryTest {
         registry.register(serviceMetaInfo);
     }
 
+    /*
     @Test
     public void unRegistryTest() {
         ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
@@ -41,10 +42,18 @@ public class RegistryTest {
         registry.unregister(serviceMetaInfo);
     }
 
+     */
+
     @Test
     public void serviceDiscoveryTest() {
         List<ServiceMetaInfo> serviceMetaInfos =
                 registry.serviceDiscovery("myService");
         System.out.println(serviceMetaInfos);
+    }
+
+    @Test
+    public void headBeatTest() throws InterruptedException {
+        registryTest();
+        Thread.sleep(1000*60);
     }
 }

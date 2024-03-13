@@ -21,4 +21,7 @@ public interface Registry {
 
     // 销毁注册中心
     void destroy();
+
+    // 心跳检测
+    void headBeat();
 }
