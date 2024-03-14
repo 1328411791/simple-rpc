@@ -1,4 +1,4 @@
-package example.rpc.loadblancer;
+package example.rpc.loadbalancer;
 
 import example.rpc.model.ServiceMetaInfo;
 

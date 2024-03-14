@@ -1,25 +1,25 @@
-package example.rpc.loadblancer;
+package example.rpc.loadbalancer;
 
 import example.rpc.model.ServiceMetaInfo;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class RandomRobinLoadBalancer implements LoadBalancer{
+public class RoundRobinLoadBalancer implements LoadBalancer {
 
-    private final Random random = new Random();
+    private final AtomicInteger counter = new AtomicInteger(0);
 
     @Override
     public ServiceMetaInfo select(Map<String, Object> requestParams, List<ServiceMetaInfo> serviceMetaInfoList) {
-        int size = serviceMetaInfoList.size();
-        if(size == 0){
+        if(serviceMetaInfoList.isEmpty()){
             return null;
         }
+        int size = serviceMetaInfoList.size();
         if(size == 1){
             return serviceMetaInfoList.getFirst();
         }
-        int index = random.nextInt(size);
+        int index = counter.getAndIncrement() % size;
         return serviceMetaInfoList.get(index);
     }
 }
