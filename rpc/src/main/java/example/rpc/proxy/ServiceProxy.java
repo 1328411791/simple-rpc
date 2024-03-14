@@ -4,6 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import example.rpc.RpcApplication;
+import example.rpc.loadbalancer.LoadBalancer;
+import example.rpc.loadbalancer.LoadBalancerFactory;
 import example.rpc.model.*;
 import example.rpc.registry.Registry;
 import example.rpc.registry.RegistryFactory;
@@ -14,7 +16,9 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class ServiceProxy implements InvocationHandler {
@@ -57,8 +61,14 @@ public class ServiceProxy implements InvocationHandler {
             if (CollUtil.isEmpty(serviceMetaInfos)){
                 throw new RuntimeException("service not found");
             }
-            ServiceMetaInfo getServiceMetaInfo = serviceMetaInfos.get(0);
-            String serviceUrl = getServiceMetaInfo.getServiceUrl();
+
+            // 获取负载均衡器
+            LoadBalancer instance = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
+            Map<String, Object> requestParams = new HashMap<>();
+            requestParams.put("methodName", request.getMethodName());
+            ServiceMetaInfo selectedService = instance.select(requestParams, serviceMetaInfos);
+
+            String serviceUrl = selectedService.getServiceUrl();
             //
             try(HttpResponse response = HttpUtil.createPost(serviceUrl)
                     .body(bytes).execute()){

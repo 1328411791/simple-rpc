@@ -1,0 +1,3 @@
+roundRobin=example.rpc.loadbalancer.RoundRobinLoadBalancer
+random=example.rpc.loadbalancer.RandomLoadBalancer
+consistentHash=example.rpc.loadbalancer.ConsistentHashLoadBalancer

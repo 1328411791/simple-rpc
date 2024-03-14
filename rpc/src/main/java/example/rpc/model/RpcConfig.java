@@ -1,5 +1,6 @@
 package example.rpc.model;
 
+import example.rpc.loadbalancer.LoadBalancerKeys;
 import example.rpc.serializer.SerializerKeys;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -42,11 +43,18 @@ public class RpcConfig {
     // 密码
     private String password;
 
+    // 超时时间
+    private long timeout = 3000L;
+
     // Mock
     private boolean mock = false;
 
     // 序列化器
     private String serializer = SerializerKeys.JDK;
+
+    private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+
+
 
     public RegistryConfig getRegistryConfig() {
         RegistryConfig registryConfig = new RegistryConfig();
@@ -55,6 +63,7 @@ public class RpcConfig {
         registryConfig.setAddress(registryAddress);
         registryConfig.setUsername(username);
         registryConfig.setPassword(password);
+        registryConfig.setTimeout(timeout);
         return registryConfig;
     }
 }
