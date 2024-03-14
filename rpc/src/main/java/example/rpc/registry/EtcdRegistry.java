@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class EtcdRegistry  implements Registry{
 
-    private static final String REGISTRY_TYPE = "/rpc/";
+    public static final String REGISTRY_TYPE = "/rpc/";
 
     private final Set<String> localRegistryNode = new HashSet<>();
 
@@ -59,13 +59,14 @@ public class EtcdRegistry  implements Registry{
 
         String registryKey = REGISTRY_TYPE + serviceMetaInfo.getServiceNodeKey();
         ByteSequence key = ByteSequence.from(registryKey.getBytes());
-        ByteSequence value = ByteSequence.from(JSONUtil.toJsonStr(serviceMetaInfo).getBytes());
+        ByteSequence value = ByteSequence.from(JSONUtil.toJsonStr(serviceMetaInfo), StandardCharsets.UTF_8);
 
         PutOption putOption = PutOption.builder().withLeaseId(leaseId).build();
 
         kvClient.put(key, value, putOption).join();
 
-        // 保存注册节点
+        // 保存注册节点‘
+        log.info("register service:{}", registryKey);
         localRegistryNode.add(registryKey);
     }
 
@@ -85,7 +86,7 @@ public class EtcdRegistry  implements Registry{
             return cacheServiceMetaInfos;
         }
 
-        String searchPrefix = REGISTRY_TYPE + serviceKey+"/";
+        String searchPrefix = REGISTRY_TYPE + serviceKey;
         try {
             GetOption getOption = GetOption.builder().isPrefix(true).build();
             List<KeyValue> keyValues = kvClient.get(
@@ -130,29 +131,32 @@ public class EtcdRegistry  implements Registry{
     @Override
     public void headBeat() {
         // 定时发送心跳
-        CronUtil.schedule("*/10 * * * * *", (Task) () -> {
-            log.info("headBeat {}" , System.currentTimeMillis());
-            try {
-                // 获取本节点所有的key
-                for (String registryNode : localRegistryNode) {
+        CronUtil.schedule("*/10 * * * * *", new Task() {
+            @Override
+            public void execute() {
+                log.info("headBeat {}", System.currentTimeMillis());
+                try {
+                    // 获取本节点所有的key
+                    for (String registryNode : localRegistryNode) {
 
-                    log.info("headBeat registryNode:{}", registryNode);
+                        log.info("headBeat registryNode:{}", registryNode);
 
-                    List<KeyValue> keyValues = kvClient.get(
-                            ByteSequence.from(registryNode, StandardCharsets.UTF_8)).join().getKvs();
+                        List<KeyValue> keyValues = kvClient.get(
+                                ByteSequence.from(registryNode, StandardCharsets.UTF_8)).join().getKvs();
 
-                    if (CollUtil.isEmpty(keyValues)) {
-                        // 重新注册
-                        continue;
+                        if (CollUtil.isEmpty(keyValues)) {
+                            // 重新注册
+                            continue;
+                        }
+
+                        KeyValue keyValue = keyValues.get(0);
+                        String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
+                        ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(value, ServiceMetaInfo.class);
+                        register(serviceMetaInfo);
                     }
-
-                    KeyValue keyValue = keyValues.get(0);
-                    String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
-                    ServiceMetaInfo serviceMetaInfo = JSONUtil.toBean(value, ServiceMetaInfo.class);
-                    register(serviceMetaInfo);
+                } catch (Exception e) {
+                    log.error("headBeat error", e);
                 }
-            }catch (Exception e){
-                log.error("headBeat error", e);
             }
         });
 

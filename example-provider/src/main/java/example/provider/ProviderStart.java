@@ -21,14 +21,16 @@ public class ProviderStart {
         LocalRegistry.register(serviceName, UserServiceImpl.class);
 
         RpcConfig rpcConfig = RpcApplication.getRpcConfig();
+        // 初始化注册中心
         RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
         Registry registry = RegistryFactory.getInstance(registryConfig.getRegistryType());
+        // 初始化服务
         ServiceMetaInfo serviceMetaInfo = new ServiceMetaInfo();
         serviceMetaInfo.setServiceName(serviceName);
         serviceMetaInfo.setServiceGroup(rpcConfig.getGroup());
-        serviceMetaInfo.setServiceAddress(registryConfig.getAddress());
-        serviceMetaInfo.setServicePort(String.valueOf(registryConfig.getPort()));
-        registry.initRegistry(registryConfig);
+        serviceMetaInfo.setServiceAddress(rpcConfig.getServerAddress());
+        serviceMetaInfo.setServicePort(String.valueOf(rpcConfig.getServerPort()));
+        System.out.println("ProviderStart.main: registry init success");
         registry.register(serviceMetaInfo);
 
         HttpServer httpServer = new VertxHttpServer();

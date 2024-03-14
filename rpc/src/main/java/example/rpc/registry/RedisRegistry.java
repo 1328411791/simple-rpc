@@ -63,4 +63,9 @@ public class RedisRegistry implements Registry{
     public void headBeat() {
 
     }
+
+    @Override
+    public void watch(String serviceNodeKey) {
+
+    }
 }

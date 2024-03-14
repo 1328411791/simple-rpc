@@ -10,11 +10,13 @@ import example.rpc.registry.RegistryFactory;
 import example.rpc.serializer.JdkSerializer;
 import example.rpc.serializer.Serializer;
 import example.rpc.serializer.SerializerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.util.List;
 
+@Slf4j
 public class ServiceProxy implements InvocationHandler {
 
     @Override
@@ -47,15 +49,18 @@ public class ServiceProxy implements InvocationHandler {
             serviceMetaInfo.setServiceAddress(registryConfig.getAddress());
             serviceMetaInfo.setServicePort(String.valueOf(registryConfig.getPort()));
 
+            String serviceNodeKey = serviceMetaInfo.getServiceNodeKey();
+            log.info("serviceNodeKey:{}", serviceNodeKey);
             // 从服务注册中心获取服务地址
-            List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceMetaInfo.getServiceNodeKey());
+            List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceNodeKey);
 
             if (CollUtil.isEmpty(serviceMetaInfos)){
                 throw new RuntimeException("service not found");
             }
             ServiceMetaInfo getServiceMetaInfo = serviceMetaInfos.get(0);
-
-            try(HttpResponse response = HttpUtil.createPost(getServiceMetaInfo.getServiceAddress())
+            String serviceUrl = getServiceMetaInfo.getServiceUrl();
+            //
+            try(HttpResponse response = HttpUtil.createPost(serviceUrl)
                     .body(bytes).execute()){
                 byte[] responseBytes = response.bodyBytes();
                 RpcResponse rpcResponse = serializer.deserialize(responseBytes, RpcResponse.class);

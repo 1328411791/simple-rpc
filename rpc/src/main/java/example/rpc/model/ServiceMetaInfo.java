@@ -1,6 +1,7 @@
 package example.rpc.model;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.Data;
 
 @Data
@@ -21,18 +22,19 @@ public class ServiceMetaInfo {
         // 服务组
         private String serviceGroup;
 
-        public String getServiceName() {
-            return String.format("%s/%s/%s", serviceName, serviceVersion, serviceGroup);
+        public String getServicePath() {
+                return String.format("%s/%s/%s", serviceName, serviceVersion, serviceGroup);
         }
 
         public String getServiceNodeKey() {
                 return String.format("%s/%s", serviceName, serviceGroup);
         }
 
-        public String getServiceAddress() {
+        public String getServiceUrl() {
                 if (!StrUtil.contains(serviceAddress, "http")) {
                     return String.format("http://%s:%s", serviceAddress,servicePort);
                 }
-            return String.format("%s/%s", serviceAddress, servicePort);
+            return String.format("%s:%s", serviceAddress, servicePort);
         }
+
 }
