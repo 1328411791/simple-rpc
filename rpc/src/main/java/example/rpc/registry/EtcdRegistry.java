@@ -1,6 +1,7 @@
 package example.rpc.registry;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.collection.ConcurrentHashSet;
 import cn.hutool.cron.CronUtil;
 import cn.hutool.cron.task.Task;
 import cn.hutool.json.JSONUtil;
@@ -9,6 +10,7 @@ import example.rpc.model.ServiceMetaInfo;
 import io.etcd.jetcd.*;
 import io.etcd.jetcd.options.GetOption;
 import io.etcd.jetcd.options.PutOption;
+import io.etcd.jetcd.watch.WatchEvent;
 import lombok.extern.slf4j.Slf4j;
 
 import java.nio.charset.StandardCharsets;
@@ -26,6 +28,8 @@ public class EtcdRegistry  implements Registry{
     private final Set<String> localRegistryNode = new HashSet<>();
 
     private final RegistryServiceCache registryServiceCache = new RegistryServiceCache();
+
+    private final Set<String> watchNode = new ConcurrentHashSet<>();
 
     private Client client;
 
@@ -89,6 +93,8 @@ public class EtcdRegistry  implements Registry{
                     getOption).join().getKvs();
 
             List<ServiceMetaInfo> serviceMetaInfos = keyValues.stream().map(keyValue -> {
+                String key = keyValue.getKey().toString(StandardCharsets.UTF_8);
+                watch(key);
                 String value = keyValue.getValue().toString(StandardCharsets.UTF_8);
                 return JSONUtil.toBean(value, ServiceMetaInfo.class);
             }).collect(Collectors.toList());
@@ -152,6 +158,29 @@ public class EtcdRegistry  implements Registry{
 
         CronUtil.setMatchSecond(true);
         CronUtil.start();
+    }
+
+    @Override
+    public void watch(String serviceNodeKey) {
+        Watch watch = client.getWatchClient();
+        boolean newWatch = watchNode.add(serviceNodeKey);
+        if (newWatch) {
+            watch.watch(ByteSequence.from(serviceNodeKey,StandardCharsets.UTF_8),watchResponse -> {
+                for (WatchEvent event : watchResponse.getEvents()) {
+                    switch (event.getEventType()) {
+                        case PUT:
+                            log.info("watch PUT:{}",event.getKeyValue());
+                            break;
+                        case DELETE:
+                            log.info("watch DELETE:{}",event.getKeyValue());
+                            registryServiceCache.clearCache();
+                            break;
+                        default:
+                            break;
+                    }
+                }
+            });
+        }
     }
 }
 

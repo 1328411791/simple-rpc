@@ -24,4 +24,6 @@ public interface Registry {
 
     // 心跳检测
     void headBeat();
+
+    void watch(String serviceNodeKey);
 }
