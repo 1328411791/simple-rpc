@@ -1,0 +1,2 @@
+failFast=example.rpc.fault.tolerant.FailFastTolerantStrategy
+failSafe=example.rpc.fault.tolerant.FailSafeTolerantStrategy

@@ -6,6 +6,8 @@ import cn.hutool.http.HttpUtil;
 import example.rpc.RpcApplication;
 import example.rpc.fault.retry.RetryStrategy;
 import example.rpc.fault.retry.RetryStrategyFactory;
+import example.rpc.fault.tolerant.TolerantStrategy;
+import example.rpc.fault.tolerant.TolerantStrategyFactory;
 import example.rpc.loadbalancer.LoadBalancer;
 import example.rpc.loadbalancer.LoadBalancerFactory;
 import example.rpc.model.*;
@@ -40,11 +42,14 @@ public class ServiceProxy implements InvocationHandler {
                 .parameters(args)
                 .build();
 
+        RpcConfig rpcConfig = RpcApplication.getRpcConfig();
+        RpcResponse rpcResponse = null;
+        // 服务元信息
+        List<ServiceMetaInfo> serviceMetaInfos = null;
+        ServiceMetaInfo selectedService = null;
+        byte[] bytes = serializer.serialize(request);
+
         try{
-            byte[] bytes = serializer.serialize(request);
-
-            RpcConfig rpcConfig = RpcApplication.getRpcConfig();
-
             // 获取注册中心
             RegistryConfig registryConfig = rpcConfig.getRegistryConfig();
             Registry registry = RegistryFactory.getInstance(registryConfig.getRegistryType());
@@ -58,7 +63,7 @@ public class ServiceProxy implements InvocationHandler {
             String serviceNodeKey = serviceMetaInfo.getServiceNodeKey();
             log.info("serviceNodeKey:{}", serviceNodeKey);
             // 从服务注册中心获取服务地址
-            List<ServiceMetaInfo> serviceMetaInfos = registry.serviceDiscovery(serviceNodeKey);
+            serviceMetaInfos = registry.serviceDiscovery(serviceNodeKey);
 
             if (CollUtil.isEmpty(serviceMetaInfos)){
                 throw new RuntimeException("service not found");
@@ -68,23 +73,30 @@ public class ServiceProxy implements InvocationHandler {
             LoadBalancer instance = LoadBalancerFactory.getInstance(rpcConfig.getLoadBalancer());
             Map<String, Object> requestParams = new HashMap<>();
             requestParams.put("methodName", request.getMethodName());
-            ServiceMetaInfo selectedService = instance.select(requestParams, serviceMetaInfos);
+            selectedService = instance.select(requestParams, serviceMetaInfos);
 
             String serviceUrl = selectedService.getServiceUrl();
             //
             RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetry());
-            RpcResponse rpcResponse = retryStrategy.doRetry(() -> {
+             rpcResponse = retryStrategy.doRetry(() -> {
                 HttpResponse response = HttpUtil.createPost(serviceUrl)
                         .body(bytes)
                         .execute();
                 byte[] bodyBytes = response.bodyBytes();
                 return serializer.deserialize(bodyBytes, RpcResponse.class);
             });
-            return rpcResponse.getData();
+
         } catch (Exception e) {
-            e.printStackTrace();
+            TolerantStrategy tolerantStrategy = TolerantStrategyFactory.getInstance(rpcConfig.getTolerant());
+            Map<String,Object> context = new HashMap<>();
+            context.put("ServiceMetaInfos",serviceMetaInfos);
+            context.put("selectService",selectedService);
+            context.put("request",request);
+            context.put("rpcConfig",rpcConfig);
+            context.put("bytes",bytes);
+            tolerantStrategy.doTolerant(context, e);
         }
 
-        return null;
+        return rpcResponse.getData();
     }
 }
