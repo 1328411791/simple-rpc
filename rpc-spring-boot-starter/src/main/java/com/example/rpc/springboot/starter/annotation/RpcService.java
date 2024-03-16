@@ -23,9 +23,6 @@ public @interface RpcService {
     // 负载均衡策略
     String loadBalance() default LoadBalancerKeys.ROUND_ROBIN;
 
-    // 服务分组
-    String group() default RpcConstant.DEFAULT_SERVICE_GROUP;
-
     // 重试策略
     String registryType() default RetryStrategyKeys.NO;
 
