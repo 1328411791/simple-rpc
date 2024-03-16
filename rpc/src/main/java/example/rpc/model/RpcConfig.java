@@ -1,5 +1,6 @@
 package example.rpc.model;
 
+import example.rpc.fault.retry.RetryStrategyKeys;
 import example.rpc.loadbalancer.LoadBalancerKeys;
 import example.rpc.serializer.SerializerKeys;
 import lombok.AllArgsConstructor;
@@ -53,6 +54,8 @@ public class RpcConfig {
     private String serializer = SerializerKeys.JDK;
 
     private String loadBalancer = LoadBalancerKeys.ROUND_ROBIN;
+
+    private String retry = RetryStrategyKeys.NO;
 
 
 

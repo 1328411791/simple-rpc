@@ -4,6 +4,8 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.http.HttpResponse;
 import cn.hutool.http.HttpUtil;
 import example.rpc.RpcApplication;
+import example.rpc.fault.retry.RetryStrategy;
+import example.rpc.fault.retry.RetryStrategyFactory;
 import example.rpc.loadbalancer.LoadBalancer;
 import example.rpc.loadbalancer.LoadBalancerFactory;
 import example.rpc.model.*;
@@ -70,12 +72,15 @@ public class ServiceProxy implements InvocationHandler {
 
             String serviceUrl = selectedService.getServiceUrl();
             //
-            try(HttpResponse response = HttpUtil.createPost(serviceUrl)
-                    .body(bytes).execute()){
-                byte[] responseBytes = response.bodyBytes();
-                RpcResponse rpcResponse = serializer.deserialize(responseBytes, RpcResponse.class);
-                return rpcResponse.getData();
-            }
+            RetryStrategy retryStrategy = RetryStrategyFactory.getInstance(rpcConfig.getRetry());
+            RpcResponse rpcResponse = retryStrategy.doRetry(() -> {
+                HttpResponse response = HttpUtil.createPost(serviceUrl)
+                        .body(bytes)
+                        .execute();
+                byte[] bodyBytes = response.bodyBytes();
+                return serializer.deserialize(bodyBytes, RpcResponse.class);
+            });
+            return rpcResponse.getData();
         } catch (Exception e) {
             e.printStackTrace();
         }
